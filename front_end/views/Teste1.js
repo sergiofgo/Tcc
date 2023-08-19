@@ -7,7 +7,7 @@ import config from "../config/config.json";
 export default function Teste1 (props ) {
     const[bolsas,setBolsas] = useState("^BVSP" )
     const[acao,setAcao] = useState('ABCB4.SA')
-    const[date,setDate] = useState(null)
+    const[date,setDate] = useState('01/01/2023')
     const[transf,setTransf] = useState(null)
     const [vetAcoes,setVetAcoes] = useState(null);
     useEffect(()=>{bolsa();},[bolsas])
@@ -25,7 +25,7 @@ export default function Teste1 (props ) {
     return (
         <SafeAreaView style = {css.fundo}>
           <KeyboardAvoidingView behavior = {Platform.OS == 'ios'?'padding':'height'} style = {css.fundo}>
-            <View>{console.log(transf)}</View>
+            <View><Text style = {css.titulo_1}>Teste com o Sistema de Predição</Text></View>
             <View style = {css.login_form}>
                 <Picker  style={css.pick1} selectedValue = {bolsas} onValueChange ={(item,itemIndex) => {setBolsas(item)}}>   
                     <Picker.Item label="B3" value="^BVSP" />
