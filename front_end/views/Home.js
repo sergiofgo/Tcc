@@ -7,7 +7,7 @@ export default function Home (props) {
     return (
         <SafeAreaView style = {css.fundo}>
             <View>
-                <Text style = {css.titulo}>Sistema de Predição de Ações</Text>
+                <Text style = {css.titulo_home}>Sistema de Predição de Ações</Text>
             </View>
             <View  style = {css.container1}>
                 <TouchableOpacity title = "Ir para Preditor1" onPress={()=>props.navigation.navigate('Preditor1')} style = {css.button1}>Preditor</TouchableOpacity>
