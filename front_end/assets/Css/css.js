@@ -1,10 +1,21 @@
 import { StyleSheet } from "react-native";
 import React from "react";
 const css = StyleSheet.create({
-    titulo:{
+    titulo_home:{
       color:'#ffffff',
       fontSize: 40,
       textAlign : 'center'
+    },
+    titulo_1:{
+      color:'#ffffff',
+      fontSize: 35,
+      textAlign : 'center',
+      marginTop: -150,
+    },
+    titulo_2:{
+      color:'#ffffff',
+      fontSize: 35,
+      textAlign : 'center',
     },
     fundo: {
       flex: 1,
