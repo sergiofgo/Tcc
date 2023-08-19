@@ -24,6 +24,7 @@ export default function Teste2 ({route}) {
     }
   return (
     <SafeAreaView style = {css.fundo}>
+      <View><Text style = {css.titulo_2}>Resultado Teste</Text></View>
         <View  style = {css.table}>
           <Table borderStyle = {{borderWidth: 1, borderColor: '#000000'}}>
               <Row data = {Valores.tableHead} style={css.TableStyle} textStyle={css.TableText}/>
