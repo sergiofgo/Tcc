@@ -24,6 +24,7 @@ export default function Preditor1 (props ) {
     return (
         <SafeAreaView style = {css.fundo}>
           <KeyboardAvoidingView behavior = {Platform.OS == 'ios'?'padding':'height'} style = {css.fundo}>
+            <View><Text style = {css.titulo_1}>Preditor de Ações</Text></View>
             <View style = {css.login_form}>
                 <Picker  style={css.pick1} selectedValue = {bolsas} onValueChange ={(item,itemIndex) => {setBolsas(item)}}>   
                     <Picker.Item label="B3" value="^BVSP" />
