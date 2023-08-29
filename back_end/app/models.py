@@ -16,40 +16,39 @@ from skfuzzy import control
 from workadays import workdays as wd
 from datetime import timedelta,date,datetime
 
-class Acoes():
-    def __init__(self,cod,bolsa):
-        self.__cod = cod
-        self.__bolsa = bolsa
+class Acao():
+    def __init__(self,acao,bolsa):
+        self.acao= acao
+        self.bolsa = bolsa
     def get_acao(self):
-        return self.__cod
+        return self.acao
     def get_bolsa(self):
-        return self.__bolsa
+        return self.bolsa
 
 class Bolsa_de_Valores():
     def __init__(self,bolsa):
-        self.__bolsa = bolsa
+        self.bolsa = bolsa
     def get_acoes(self):
         info = inv.stocks.get_stocks('brazil')
-        if (self.__bolsa == '^BVSP'):
+        if (self.bolsa == '^BVSP'):
             info['symbol'] += '.SA'
-        elif (self.__bolsa == '^NYA' or self.__bolsa =="^IXIC"):
+        elif (self.bolsa == '^NYA' or self.bolsa =="^IXIC"):
             info = inv.stocks.get_stocks('united states')
         info = info.sort_values(by = 'full_name')  
         return info[['full_name','symbol']].to_json(index= False,orient ='table')
     
 class Predicao ():
-    def __init__(self,bolsa,acao,data):
-        self.__bolsa = bolsa
-        self.__acao = acao
-        self.__data = data
-    def aux(self):
+    def __init__(self,action):
+        self.bolsa = action.bolsa
+        self.acao = action.acao
+    def aux(self, data):
         #criação dos dataframes com os historicos da ação e do indice da bolsa de valores selecionada
-        if (self.__data != date.today()):
-            df = yf.download(self.__acao, self.__data - timedelta(60), self.__data+timedelta(15))
-            exchange = yf.download(self.__bolsa, self.__data- timedelta(60), self.__data+timedelta(15))
+        if (data != date.today()):
+            df = yf.download(self.acao, data - timedelta(60), data+timedelta(15))
+            exchange = yf.download(self.bolsa, data- timedelta(60), data+timedelta(15))
         else:
-            df = yf.download(self.__acao, self.__data - timedelta(50), self.__data)
-            exchange = yf.download(self.__bolsa, self.__data- timedelta(50), self.__data) 
+            df = yf.download(self.acao, data - timedelta(50), data)
+            exchange = yf.download(self.bolsa, data- timedelta(50), data) 
         
         #Criação, com o auxilio da biblioteca ta-lib das series rsi, macd e beta no dataframe, correspondentes aos indicadores técnicos
         self.indices_historic(df,exchange)
@@ -96,7 +95,7 @@ class Predicao ():
         #Criação do Controle de Sistema Fuzzy
         sim = control.ControlSystemSimulation(system)
         #Definição da data de referência
-        data_ref = self.data_final(self.__data,df)
+        data_ref = self.data_final(data,df)
  
         
         #Inserção dos dados discretos para realização da Fuzzificação
@@ -107,7 +106,7 @@ class Predicao ():
         #calcula o sistema de controle fuzzy
         sim.compute()
         #Obtenção do subconjunto do Dataframe com periodo de 10 dias
-        if (self.__data != date.today()):
+        if (data != date.today()):
             df_aux = df[data_ref:data_ref + timedelta(10)]
         else:
             df_aux = df[data_ref - timedelta(10):data_ref]
@@ -118,7 +117,7 @@ class Predicao ():
         list_index = [df_aux.index[i].strftime('%d/%m/%Y') for i in range (len(df_aux.index))]
         list_close = np.round(df_aux.Close.values,decimals =2)
         n = len(list_close)
-        dr = pd.DataFrame({'Ação':[self.__acao]+[0]*(n-1),'Resultado_Crisp': [np.round(sim.output['Predicao'],decimals = 2)]+[0]*(n-1),'Img_Pert':[np.round(fuzz.interp_membership(Predicao.universe,Predicao[self.resultado(sim.output['Predicao'],Predicao)].mf,sim.output['Predicao']),decimals = 2)]+[0]*(n-1),'Resultado_Fuzzy':[self.resultado(sim.output['Predicao'],Predicao)]+[0]*(n-1),'Data': list_index, 'Close': list_close,'Rsi':[np.round(df[data_ref:data_ref].Rsi.values[0],decimals = 2)]+[0]*(n-1),'Macd':[np.round(df[data_ref:data_ref].Macd.values[0], decimals = 2)]+[0]*(n-1), 'Beta':[np.round(df[data_ref:data_ref].Beta.values[0],decimals = 2)]+[0]*(n-1),'Tam':[n]+[0]*(n-1)})
+        dr = pd.DataFrame({'Ação':[self.acao]+[0]*(n-1),'Resultado_Crisp': [np.round(sim.output['Predicao'],decimals = 2)]+[0]*(n-1),'Img_Pert':[np.round(fuzz.interp_membership(Predicao.universe,Predicao[self.resultado(sim.output['Predicao'],Predicao)].mf,sim.output['Predicao']),decimals = 2)]+[0]*(n-1),'Resultado_Fuzzy':[self.resultado(sim.output['Predicao'],Predicao)]+[0]*(n-1),'Data': list_index, 'Close': list_close,'Rsi':[np.round(df[data_ref:data_ref].Rsi.values[0],decimals = 2)]+[0]*(n-1),'Macd':[np.round(df[data_ref:data_ref].Macd.values[0], decimals = 2)]+[0]*(n-1), 'Beta':[np.round(df[data_ref:data_ref].Beta.values[0],decimals = 2)]+[0]*(n-1),'Tam':[n]+[0]*(n-1)})
         print(dr)
         #plotar(rsi, macd, beta,predicao,sim)
         return dr.to_json(index= False,orient ='table')
@@ -146,20 +145,12 @@ class Predicao ():
                 data_ref = data_ref - timedelta(1)
             return data_ref
 
-    #obter graficos dos testes
-    def plotar(rsi,macd,beta,predicao,sim):
-        rsi.view(sim = sim)
-        plt.savefig('C:\\Users\\Lenovo\Desktop\\rsi.png', format='png')
-        macd.view(sim = sim)
-        plt.savefig('C:\\Users\\Lenovo\\Desktop\\macd.png', format='png')
-        beta.view(sim = sim)
-        plt.savefig('C:\\Users\Lenovo\\Desktop\\besta.png')
-        
     
 class Predicao_Atual(Predicao):
-    def __init__(self,bolsa,acao,data):
-         super().__init__(bolsa,acao,data)
+    def __init__(self,action):
+         super().__init__(action)
 class Predicao_Teste(Predicao):
-    def __init__(self,bolsa,acao,data):
-         super().__init__(bolsa,acao,data)
+    def __init__(self,action, data):
+         super().__init__(action)
+         self.data = data
     
