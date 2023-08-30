@@ -43,4 +43,3 @@ def resultado2(request):
 
 
     
-
